@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAE Tracker — C1 Writing &amp; Grammar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#131625;--panel:#1B1F31;--raised:#242A40;--line:#333A55;--line2:#2A3048;
+    --tx:#ECEEF6;--mut:#9AA0BC;--dim:#6E7590;
+    --coral:#FF6F61;--coral2:#E8574A;--mint:#57D9A3;--amber:#F2B84B;--red:#FF5A5A;
+    --disp:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+    --body:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--disp);font-weight:700;letter-spacing:-.02em;margin:0}
+  p{margin:0 0 1em;color:#D4D8E8}
+  a{color:var(--coral)}
+  ::selection{background:var(--coral);color:#141414}
+  .app{display:flex;min-height:100vh}
+  .rail{width:224px;flex:0 0 224px;background:var(--panel);border-right:1px solid var(--line2);padding:22px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{font-family:var(--disp);font-weight:800;font-size:17px;padding:0 8px}
+  .brand .c{color:var(--coral)}
+  .brand .s{display:block;font-family:var(--body);font-weight:400;font-size:11.5px;color:var(--mut);margin-top:3px}
+  .sync{margin:16px 8px 6px;font-size:11.5px;padding:7px 10px;border-radius:8px;background:var(--raised);border:1px solid var(--line);color:var(--mut)}
+  .sync b{color:var(--tx)}
+  .sync.ok{border-color:rgba(87,217,163,.4)} .sync.ok b{color:var(--mint)}
+  .sync.err{border-color:rgba(255,90,90,.4)} .sync.err b{color:var(--red)}
+  .nav{margin-top:14px;display:flex;flex-direction:column;gap:2px}
+  .nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:var(--mut);font-weight:500;font-size:14px}
+  .nav button .ic{width:16px;text-align:center}
+  .nav button:hover{background:var(--raised);color:var(--tx)}
+  .nav button.on{background:var(--raised);color:var(--tx)}
+  .nav button.on .ic{color:var(--coral)}
+  .railfoot{margin-top:16px;padding-top:12px;border-top:1px solid var(--line2);font-size:12px;color:var(--dim);padding-left:8px}
+  .railfoot b{color:var(--tx)}
+  .main{flex:1;min-width:0;padding:30px 40px 100px;max-width:900px}
+  .view{display:none} .view.on{display:block}
+  h1.pg{font-size:26px;font-weight:800;margin-bottom:3px}
+  .lede{color:var(--mut);margin:0 0 20px;font-size:14px}
+  h2{font-size:18px;margin:26px 0 10px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .panel+.panel{margin-top:12px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .kick{display:inline-block;font-size:12px;font-weight:600;color:var(--coral);margin-bottom:8px}
+  .kick.m{color:var(--mint)}
+  .mission{background:linear-gradient(180deg,#20263B,#191D2E);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .mission .ph{color:var(--coral);font-weight:600;font-size:12px}
+  .mission .g{font-family:var(--disp);font-weight:800;font-size:23px;margin:6px 0 2px}
+  .mission .w{color:var(--mint);font-size:14px;font-weight:600}
+  .mission .ref{color:var(--mut);font-size:13px;margin-top:6px}
+  .pace{margin-top:14px;display:inline-block;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px}
+  .pace.ok{background:rgba(87,217,163,.12);color:var(--mint)} .pace.bad{background:rgba(255,90,90,.12);color:var(--red)}
+  .task{display:flex;gap:12px;align-items:flex-start;padding:14px 4px;border-bottom:1px solid var(--line2)}
+  .task:last-child{border-bottom:0}
+  .task .box{flex:0 0 22px;width:22px;height:22px;border:2px solid var(--line);border-radius:7px;margin-top:1px;display:flex;align-items:center;justify-content:center;color:transparent;font-size:13px;cursor:pointer}
+  .task.done .box{background:var(--mint);border-color:var(--mint);color:#10241b}
+  .task .body{flex:1;min-width:0}
+  .task .tt{font-weight:600} .task.done .tt{color:var(--mut);text-decoration:line-through}
+  .task .td{color:var(--mut);font-size:13px;margin-top:2px}
+  .task .acts{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .lnk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--coral);border:1px solid var(--line);border-radius:8px;padding:6px 11px;text-decoration:none;background:var(--raised)}
+  .lnk:hover{border-color:var(--coral)}
+  .lnk.m{color:var(--mint)} .lnk.m:hover{border-color:var(--mint)}
+  .bignum{font-family:var(--disp);font-weight:800;font-size:34px;font-variant-numeric:tabular-nums;line-height:1}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;flex:1;min-width:110px}
+  .stat .k{color:var(--mut);font-size:12px;font-weight:600} .stat .v{font-family:var(--disp);font-weight:800;font-size:22px;margin-top:3px}
+  .phase{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px}
+  .phh{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--panel);cursor:pointer}
+  .phh .bd{font-family:var(--disp);font-weight:800;font-size:11px;padding:4px 9px;border-radius:99px;background:var(--raised);color:var(--coral)}
+  .phh .tt{font-family:var(--disp);font-weight:700;font-size:15px}
+  .phh .wk{margin-left:auto;color:var(--mut);font-size:12px}
+  .phb{display:none;padding:4px 16px 14px} .phase.op .phb{display:block}
+  .wkrow{display:grid;grid-template-columns:34px 1fr 1fr 90px;gap:10px;padding:11px 0;border-bottom:1px solid var(--line2);align-items:center}
+  .wkrow:last-child{border-bottom:0}
+  @media(max-width:640px){.wkrow{grid-template-columns:1fr}}
+  .wkrow .wn{font-family:var(--disp);font-weight:800;color:var(--dim)}
+  .wkrow .h{font-size:11px;font-weight:600;color:var(--dim)} .wkrow .g .h{color:var(--coral)} .wkrow .w .h{color:var(--mint)}
+  .wkrow .v{font-size:13.5px}
+  .wkdone{all:unset;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);border:1px solid var(--line);border-radius:8px;padding:5px 9px;text-align:center}
+  .wkdone.on{background:var(--mint);color:#10241b;border-color:var(--mint)}
+  .btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;background:var(--coral);color:#1a1a1a;font-weight:700;font-size:14px;padding:10px 16px;border-radius:10px}
+  .btn:hover{background:var(--coral2)}
+  .btn.g{background:transparent;color:var(--tx);border:1px solid var(--line)} .btn.g:hover{border-color:var(--coral)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .field{width:100%;background:var(--raised);border:1px solid var(--line);border-radius:9px;color:var(--tx);font-family:var(--body);font-size:14px;padding:10px 12px}
+  .field:focus{outline:none;border-color:var(--coral)}
+  label.lb{display:block;font-size:12.5px;color:var(--mut);margin:10px 0 4px;font-weight:600}
+  .note{color:var(--mut);font-size:13px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:14px}
+  .seg button{all:unset;cursor:pointer;padding:8px 14px;font-size:13px;font-weight:600;color:var(--mut)}
+  .seg button.on{background:var(--coral);color:#1a1a1a}
+  .tagpill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;margin-bottom:10px}
+  .tagpill.int{background:rgba(107,184,232,.15);color:#8CC7EC} .tagpill.adv{background:rgba(255,111,97,.15);color:var(--coral)}
+  .opt{display:block;width:100%;text-align:left;background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;color:var(--tx);cursor:pointer;font-size:14px;font-family:var(--body)}
+  .opt:hover{border-color:var(--coral)}
+  .opt.correct{border-color:var(--mint);background:rgba(87,217,163,.12)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,90,90,.12)}
+  .expl{font-size:13.5px;color:var(--mint);margin-top:8px}
+  .test{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+  .test.pass{border-color:rgba(87,217,163,.5)} .test.fail{border-color:rgba(255,90,90,.5)}
+  .test .st{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--raised);color:var(--mut)}
+  .test .st.pass{color:var(--mint)} .test .st.fail{color:var(--red)}
+  .scale-in{display:flex;gap:8px;align-items:center;margin:6px 0}
+  .scale-in span{width:190px;font-size:13px;color:var(--mut)}
+  .scale-in select{background:var(--raised);border:1px solid var(--line);border-radius:8px;color:var(--tx);padding:6px 8px;font-family:var(--body)}
+  .flash{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--mint);color:#10241b;font-weight:700;font-size:13px;padding:9px 16px;border-radius:99px;opacity:0;transition:.3s;pointer-events:none}
+  .flash.show{opacity:1}
+  .mtabs{display:none}
+  @media(max-width:820px){
+    .rail{display:none} .main{padding:22px 16px 96px}
+    .mtabs{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--line2);z-index:20;overflow:auto}
+    .mtabs button{all:unset;flex:1 0 auto;text-align:center;padding:10px 12px;color:var(--mut);font-size:10px;font-weight:600}
+    .mtabs button .ic{display:block;font-size:16px;margin-bottom:2px}
+    .mtabs button.on{color:var(--coral)}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="brand">CAE <span class="c">Tracker</span><span class="s">C1 · writing &amp; grammar</span></div>
+    <div class="sync" id="sync">Not connected · local only</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="railfoot">Week <b id="fw">1</b> · Streak <b id="fs">0</b>d<br>Next test: <b id="fnt">—</b></div>
+  </aside>
+  <main class="main" id="main">
+
+    <!-- TODAY -->
+    <section class="view on" data-v="today">
+      <span class="kick">TODAY</span>
+      <h1 class="pg" id="tdate">—</h1>
+      <div class="mission">
+        <div class="ph" id="mph">PHASE 1</div>
+        <div class="g" id="mg">—</div>
+        <div class="w" id="mw">—</div>
+        <div class="ref" id="mref"></div>
+        <div id="mpace"></div>
+      </div>
+      <h2>Today's 3 blocks</h2>
+      <div class="panel" id="tblocks"></div>
+      <div class="row" style="margin-top:12px">
+        <div class="stat"><div class="k">STREAK</div><div class="v" id="tstreak">0</div></div>
+        <div class="stat"><div class="k">TODAY</div><div class="v" id="tdone">0 / 3</div></div>
+        <div class="stat"><div class="k">DAYS TO TEST</div><div class="v" id="tnt">—</div></div>
+      </div>
+    </section>
+
+    <!-- PLAN -->
+    <section class="view" data-v="plan">
+      <span class="kick m">THE COURSE</span>
+      <h1 class="pg">10-week plan</h1>
+      <p class="lede">Two tracks together: a <span style="color:var(--coral)">grammar structure</span> that lifts your Language score, and a <span style="color:var(--mint)">writing task type</span>. A checkpoint test every 3 weeks. Mark weeks done — it syncs to GitHub.</p>
+      <div id="planlist"></div>
+    </section>
+
+    <!-- DRILL -->
+    <section class="view" data-v="drill">
+      <span class="kick">5-MIN GRAMMAR WARM-UP · 100 QUESTIONS</span>
+      <h1 class="pg">Grammar drill</h1>
+      <p class="lede">Quick self-testing on the structures the exam rewards. Retrieval practice like this is one of the two study methods with the strongest research behind it. Pick a level.</p>
+      <div class="seg" id="lvlseg">
+        <button data-l="all" class="on">All 100</button>
+        <button data-l="int">Intermediate</button>
+        <button data-l="adv">Advanced</button>
+      </div>
+      <div class="panel" id="drillcard"></div>
+      <div class="row" style="margin-top:12px">
+        <div class="stat"><div class="k">ACCURACY</div><div class="v" id="dacc">—</div></div>
+        <div class="stat"><div class="k">ANSWERED</div><div class="v" id="dtot">0</div></div>
+        <div class="stat"><div class="k">POOL</div><div class="v" id="dpool">100</div></div>
+      </div>
+    </section>
+
+    <!-- TESTS -->
+    <section class="view" data-v="tests">
+      <span class="kick">CHECKPOINTS · REAL EXAMS</span>
+      <h1 class="pg">Tests every 3 weeks</h1>
+      <p class="lede">Your real practice papers (engexam, Flo-Joe, Study.com) — not invented questions. Do the test, log your %; below 60% the app tells you which weeks to redo.</p>
+      <div id="testlist"></div>
+    </section>
+
+    <!-- WRITING -->
+    <section class="view" data-v="writing">
+      <span class="kick m">WRITE · GET CORRECTED · LOG</span>
+      <h1 class="pg">Writing</h1>
+      <p class="lede">How this works: you write the week's task, get it corrected by a real AI tool, then log the four band scores here so you can see your writing improve over time.</p>
+      <div class="panel" style="margin-bottom:12px">
+        <h3 style="font-size:15px;margin-bottom:6px">Step 1 — write &amp; get corrected (free AI)</h3>
+        <p class="note" style="margin:0 0 10px">Write &amp; Improve is Cambridge's own free tool. It corrects every error, estimates your CEFR level, and has real CAE tasks (essay, report, review…). Write there, fix what it flags, then come back and log your bands below.</p>
+        <a class="btn sm" href="https://writeandimprove.com/" target="_blank" rel="noopener">Open Write &amp; Improve ↗</a>
+      </div>
+      <div class="panel">
+        <h3 style="font-size:15px;margin-bottom:6px">Step 2 — log your bands (0–5, the four exam scales)</h3>
+        <label class="lb">Task type</label>
+        <select class="field" id="wtype">
+          <option>Part 1 — Essay</option><option>Part 2 — Proposal</option><option>Part 2 — Report</option>
+          <option>Part 2 — Review</option><option>Part 2 — Letter/Email</option>
+        </select>
+        <div style="margin-top:12px">
+          <div class="scale-in"><span>Content</span><select class="field wsc" style="width:auto" data-s="content"><option>0</option><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
+          <div class="scale-in"><span>Communicative Achievement</span><select class="field wsc" style="width:auto" data-s="ca"><option>0</option><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
+          <div class="scale-in"><span>Organisation</span><select class="field wsc" style="width:auto" data-s="org"><option>0</option><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
+          <div class="scale-in"><span>Language</span><select class="field wsc" style="width:auto" data-s="lang"><option>0</option><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div>
+        </div>
+        <button class="btn sm" id="wsave" style="margin-top:12px">Log this piece</button>
+      </div>
+      <h2>History</h2>
+      <div class="panel" id="whist"></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="view" data-v="prog">
+      <span class="kick m">THE NUMBERS</span>
+      <h1 class="pg">Progress</h1>
+      <div class="row">
+        <div class="stat"><div class="k">Course</div><div class="v" id="pcourse">0%</div></div>
+        <div class="stat"><div class="k">Days active</div><div class="v" id="pdays">0</div></div>
+        <div class="stat"><div class="k">Drill accuracy</div><div class="v" id="pacc">—</div></div>
+        <div class="stat"><div class="k">Tests passed</div><div class="v" id="ptests">0</div></div>
+      </div>
+      <h2>10 weeks</h2>
+      <div class="panel"><div id="pweeks" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+      <h2>Writing band trend (Language)</h2>
+      <div class="panel" id="ptrend"><span class="note">No writing logged yet.</span></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" data-v="set">
+      <span class="kick">SAVE TO GITHUB</span>
+      <h1 class="pg">GitHub sync</h1>
+      <p class="lede">Your progress is committed to a file in your own repo, so it's saved for real and versioned. The token stays only in this browser.</p>
+      <div class="panel">
+        <label class="lb">GitHub username (owner)</label><input class="field" id="s_owner" placeholder="e.g. yourname">
+        <label class="lb">Repository name</label><input class="field" id="s_repo" placeholder="e.g. cae-progress">
+        <label class="lb">Branch</label><input class="field" id="s_branch" value="main">
+        <label class="lb">File path</label><input class="field" id="s_path" value="cae-progress.json">
+        <label class="lb">Fine-grained token (Contents: Read &amp; write, this repo only)</label>
+        <input class="field" id="s_token" type="password" placeholder="github_pat_…">
+        <div class="row" style="margin-top:14px">
+          <button class="btn" id="s_connect">Connect &amp; load</button>
+          <button class="btn g" id="s_save">Save now</button>
+          <button class="btn g" id="s_forget">Disconnect</button>
+        </div>
+        <p class="note" id="s_status" style="margin-top:12px"></p>
+      </div>
+      <div class="panel">
+        <h3 style="font-size:15px;margin-bottom:8px">Setup, once (2 min)</h3>
+        <p class="note">1. Create an empty repo (e.g. <b style="color:var(--tx)">cae-progress</b>). It can be private.<br>
+        2. GitHub → Settings → Developer settings → <b style="color:var(--tx)">Fine-grained tokens</b> → generate one with <b style="color:var(--tx)">Repository access: only that repo</b> and <b style="color:var(--tx)">Contents: Read and write</b>.<br>
+        3. Paste it above and press Connect. The app creates the JSON file on first save and commits every change after.<br>
+        4. To open the app anywhere: put this <b style="color:var(--tx)">index.html</b> in a repo and turn on GitHub Pages — or just open the file locally. Both sync to GitHub.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="mtabs" id="mtabs"></div>
+<div class="flash" id="flash">Saved</div>
+
+<script>
+/* ============================ CONFIG DATA ============================ */
+const NAV=[["today","◎","Today"],["plan","▤","Plan"],["drill","✦","Drill"],
+["tests","◈","Tests"],["writing","✎","Writing"],["prog","◍","Progress"],["set","⚙","GitHub"]];
+
+const UDEMY="https://www.udemy.com/course/cambridge-c1-advanced-preparation-course/";
+const WI="https://writeandimprove.com/";
+const bbc=q=>"https://www.bbc.co.uk/learningenglish/search?q="+encodeURIComponent(q);
+
+const WEEKS=[
+ {w:1,ph:1,g:"Verb tenses + articles",wr:"Part 1 Essay — structure & the 'which is more important' argument",bbc:"present perfect and past simple"},
+ {w:2,ph:1,g:"Conditionals (all) + inversion after negatives",wr:"Proposal — persuasive register, headings, recommendations",bbc:"conditionals"},
+ {w:3,ph:1,g:"Passive & impersonal (it is argued that…)",wr:"Re-do the W1 essay (spaced) + self-mark",bbc:"passive voice"},
+ {w:4,ph:2,g:"Relative & participle clauses",wr:"Report — neutral tone, sections, evidence",bbc:"relative clauses"},
+ {w:5,ph:2,g:"Cleft & emphatic structures (what strikes me is…)",wr:"Review — description + balanced evaluation",bbc:"cleft sentences"},
+ {w:6,ph:2,g:"Hedging & modality (tends to, may well)",wr:"Formal letter/email — register to a stated reader",bbc:"modal verbs"},
+ {w:7,ph:2,g:"Cohesion: advanced linkers + reference",wr:"Part 1 essay again (spaced) — aim band 4 Language",bbc:"linking words"},
+ {w:8,ph:3,g:"Nominalisation & complex noun phrases",wr:"Full paper #1 (both tasks, 90 min) + self-mark",bbc:"nominalisation"},
+ {w:9,ph:3,g:"Inversion for emphasis (review your errors)",wr:"Full paper #2 — target 2 weakest scales",bbc:"inversion"},
+ {w:10,ph:3,g:"Light review only — no new structures",wr:"Full paper #3 + memorised utility phrases",bbc:"advanced grammar review"},
+];
+const PHN={1:"PHASE 1 · Rubric literacy & hardest types",2:"PHASE 2 · Rotate all task types",3:"PHASE 3 · Timed papers, push to band 4–5"};
+const PHW={1:"Weeks 1–3",2:"Weeks 4–7",3:"Weeks 8–10"};
+
+const BLOCKS=[
+ {k:"course",tt:"Course — 30 min",td:"Do today's lesson in the Udemy C1 Advanced preparation course. This is your main structured input.",link:UDEMY,ll:"Open Udemy course ↗"},
+ {k:"grammar",tt:"Grammar — BBC lesson for this week + 5-min drill",td:"Watch/read the BBC lesson for this week's structure, then do 5 minutes in the Drill tab.",link:"BBC",ll:"BBC lesson ↗",drill:true},
+ {k:"writing",tt:"Writing — write & get corrected",td:"Write the week's task, paste it into Write & Improve for instant AI correction, then log the bands in the Writing tab.",link:WI,ll:"Write & Improve ↗"},
+];
+
+const TESTS=[
+ {id:"c1",title:"Checkpoint 1 · Use of English Test 1",afterWeek:3,
+  desc:"Reading & Use of English practice test — grammar foundations (cloze + transformations).",
+  links:[["engexam — Practice Test 1","https://engexam.info/cae-reading-and-use-of-english-practice-tests/cae-reading-and-use-of-english-practice-test-1/"]],
+  reviewWeeks:[1,2,3]},
+ {id:"c2",title:"Checkpoint 2 · Use of English Test 2",afterWeek:6,
+  desc:"Pick Test 2 from the engexam list, plus one timed Part 2 writing task (log it in Writing).",
+  links:[["engexam — all tests (pick #2)","https://engexam.info/cae-reading-and-use-of-english-practice-tests/"]],
+  reviewWeeks:[4,5,6]},
+ {id:"c3",title:"Checkpoint 3 · Flo-Joe test + full essay",afterWeek:9,
+  desc:"A Flo-Joe CAE test, plus a full Part 1 essay under exam time (log in Writing).",
+  links:[["Flo-Joe — CAE tests","https://www.flo-joe.co.uk/cae/students/tests/"]],
+  reviewWeeks:[7,8,9]},
+ {id:"final",title:"Final · Full mock",afterWeek:10,
+  desc:"A complete mock. Use the Study.com study guide or a fresh engexam/Flo-Joe paper.",
+  links:[["Study.com — CAE study guide","https://study.com/academy/course/cambridge-english-advanced-cae-test-prep-study-guide.html"],
+         ["engexam — all tests","https://engexam.info/cae-reading-and-use-of-english-practice-tests/"]],
+  reviewWeeks:[1,2,3,4,5,6,7,8,9,10]},
+];
+const PASS=60;
+
+/* ---- 100 grammar questions: 50 intermediate + 50 advanced (verified) ---- */
+const BANK=[
+ // ---------- INTERMEDIATE (B2 bridge) ----------
+ {l:"int",q:"She ___ here since 2019.",o:["works","has worked","worked","is working"],a:1,e:"'since' + present perfect for something that started in the past and continues."},
+ {l:"int",q:"I ___ to Japan last year.",o:["have gone","went","have been","go"],a:1,e:"'last year' is finished time → past simple."},
+ {l:"int",q:"By the time we arrived, the film ___.",o:["started","has started","had started","starts"],a:2,e:"Past perfect for the earlier of two past actions."},
+ {l:"int",q:"Water ___ at 100°C.",o:["boils","is boiling","boiled","boil"],a:0,e:"Present simple for general/scientific facts."},
+ {l:"int",q:"Look! It ___.",o:["rains","is raining","rain","rained"],a:1,e:"Present continuous for something happening now."},
+ {l:"int",q:"You ___ smoke here; it's forbidden.",o:["mustn't","don't have to","needn't","could"],a:0,e:"'mustn't' = prohibition."},
+ {l:"int",q:"We enjoy ___ to the beach.",o:["to go","going","go","gone"],a:1,e:"'enjoy' is followed by the -ing form."},
+ {l:"int",q:"She decided ___ abroad.",o:["studying","to study","study","studied"],a:1,e:"'decide' is followed by the infinitive with 'to'."},
+ {l:"int",q:"This is ___ interesting book.",o:["a","an","the","(no word)"],a:1,e:"'an' before a vowel sound."},
+ {l:"int",q:"___ sun rises in the east.",o:["A","An","The","(no word)"],a:2,e:"'the' for something unique."},
+ {l:"int",q:"He is good ___ maths.",o:["in","at","on","for"],a:1,e:"Fixed phrase: 'good at'."},
+ {l:"int",q:"I'm interested ___ history.",o:["on","in","at","for"],a:1,e:"Fixed phrase: 'interested in'."},
+ {l:"int",q:"She's taller ___ her brother.",o:["than","then","that","as"],a:0,e:"Comparatives use 'than'."},
+ {l:"int",q:"It's the ___ film I've ever seen.",o:["better","best","most good","goodest"],a:1,e:"Superlative of 'good' is 'best'."},
+ {l:"int",q:"There isn't ___ milk left.",o:["some","any","many","few"],a:1,e:"'any' in negatives with uncountable nouns."},
+ {l:"int",q:"How ___ money do you need?",o:["many","much","few","little"],a:1,e:"'much' with uncountable nouns."},
+ {l:"int",q:"If it rains, we ___ inside.",o:["stay","will stay","stayed","would stay"],a:1,e:"First conditional: if + present, will + verb."},
+ {l:"int",q:"If I were rich, I ___ travel.",o:["will","would","can","am"],a:1,e:"Second conditional: if + past, would + verb."},
+ {l:"int",q:"The book ___ by millions.",o:["reads","is read","read","reading"],a:1,e:"Present simple passive: is + past participle."},
+ {l:"int",q:"The house ___ in 1990.",o:["built","was built","is built","has built"],a:1,e:"Past simple passive: was + past participle."},
+ {l:"int",q:"The man ___ lives next door is a doctor.",o:["which","who","whose","where"],a:1,e:"'who' for people in a relative clause."},
+ {l:"int",q:"That's the town ___ I was born.",o:["which","who","where","when"],a:2,e:"'where' for places."},
+ {l:"int",q:"She said she ___ tired.",o:["is","was","be","been"],a:1,e:"Reported speech shifts present → past."},
+ {l:"int",q:"I've lived here ___ ten years.",o:["since","for","ago","during"],a:1,e:"'for' + a period of time."},
+ {l:"int",q:"He's been working ___ this morning.",o:["for","since","from","at"],a:1,e:"'since' + a point in time."},
+ {l:"int",q:"I look forward to ___ from you.",o:["hear","hearing","heard","be hearing"],a:1,e:"'look forward to' + -ing (to is a preposition here)."},
+ {l:"int",q:"You ___ to wear a seatbelt.",o:["have","has","having","had"],a:0,e:"'have to' for obligation (I/you/we/they)."},
+ {l:"int",q:"She can ___ three languages.",o:["speaks","speak","speaking","spoke"],a:1,e:"Modal 'can' + base verb."},
+ {l:"int",q:"___ you like some tea?",o:["Would","Will","Do","Are"],a:0,e:"'Would you like…?' for offers."},
+ {l:"int",q:"I wish I ___ more time.",o:["have","had","has","having"],a:1,e:"'wish' + past simple for a present regret."},
+ {l:"int",q:"He's used to ___ early.",o:["get up","getting up","got up","gets up"],a:1,e:"'be used to' + -ing (accustomed to)."},
+ {l:"int",q:"She's the person ___ car was stolen.",o:["who","which","whose","whom"],a:2,e:"'whose' shows possession."},
+ {l:"int",q:"I haven't seen him ___.",o:["already","yet","still","ever"],a:1,e:"'yet' in negatives about the recent past."},
+ {l:"int",q:"Have you ___ been to Paris?",o:["ever","never","yet","already"],a:0,e:"'ever' in questions about life experience."},
+ {l:"int",q:"The coffee is too hot ___ drink.",o:["to","for","for to","that"],a:0,e:"'too + adjective + to + verb'."},
+ {l:"int",q:"It's warm ___ to swim.",o:["enough","too","very","so"],a:0,e:"'adjective + enough + to'."},
+ {l:"int",q:"There are ___ people here today.",o:["fewer","less","fewest","least"],a:0,e:"'fewer' with countable nouns."},
+ {l:"int",q:"I'd rather have tea ___ coffee.",o:["than","then","that","to"],a:0,e:"'would rather … than'."},
+ {l:"int",q:"She made me ___.",o:["to wait","wait","waiting","waited"],a:1,e:"'make someone + bare infinitive'."},
+ {l:"int",q:"He let us ___ early.",o:["to leave","leave","leaving","left"],a:1,e:"'let someone + bare infinitive'."},
+ {l:"int",q:"By 2030, I ___ my degree.",o:["finish","will finish","will have finished","finished"],a:2,e:"Future perfect: completed before a future point."},
+ {l:"int",q:"Do you mind ___ the window?",o:["to open","opening","open","opened"],a:1,e:"'mind' + -ing."},
+ {l:"int",q:"The keys ___ on the table.",o:["is","are","was","be"],a:1,e:"'keys' is plural → 'are'."},
+ {l:"int",q:"Everyone ___ arrived.",o:["has","have","are","were"],a:0,e:"'everyone' takes a singular verb."},
+ {l:"int",q:"She's lived here ___ she was a child.",o:["for","since","when","while"],a:1,e:"'since' + a past point/clause."},
+ {l:"int",q:"You ___ hurry — there's plenty of time.",o:["mustn't","don't have to","can't","shouldn't"],a:1,e:"'don't have to' = no obligation (different from 'mustn't')."},
+ {l:"int",q:"This bag isn't ___; it's hers.",o:["my","mine","me","myself"],a:1,e:"Possessive pronoun 'mine' stands alone."},
+ {l:"int",q:"He apologised ___ being late.",o:["of","for","about","to"],a:1,e:"'apologise for + -ing'."},
+ {l:"int",q:"I'm looking ___ my keys.",o:["at","for","after","up"],a:1,e:"'look for' = search for."},
+ {l:"int",q:"We arrived ___ the airport early.",o:["to","at","in","on"],a:1,e:"'arrive at' a place/point (arrive in a city/country)."},
+ // ---------- ADVANCED (C1) ----------
+ {l:"adv",q:"No sooner ___ than it rang.",o:["had I sat down","I had sat down","did I sit down","I sat down"],a:0,e:"'No sooner + had + subject … than' — inversion."},
+ {l:"adv",q:"Not only ___ late, but he also forgot.",o:["was he","he was","did he","he did"],a:0,e:"A fronted 'Not only' triggers inversion."},
+ {l:"adv",q:"Rarely ___ such talent.",o:["we see","do we see","we do see","see we"],a:1,e:"Fronted negative adverb → auxiliary + subject."},
+ {l:"adv",q:"Had I known, I ___ come.",o:["would","would have","will","had"],a:1,e:"Inverted third conditional: 'Had + p.p., would have + p.p.'"},
+ {l:"adv",q:"Were I you, I ___ apologise.",o:["will","would","had","have"],a:1,e:"Inverted second conditional ('Were I you…')."},
+ {l:"adv",q:"Should you need help, ___.",o:["call me","you call","calling","to call"],a:0,e:"'Should you…' = 'If you should…'; main clause imperative."},
+ {l:"adv",q:"It was John ___ broke the window.",o:["who","which","whose","whom"],a:0,e:"Cleft sentence emphasising a person → 'who'."},
+ {l:"adv",q:"What I need ___ a break.",o:["is","are","be","being"],a:0,e:"'What…' clause takes a singular verb → 'is'."},
+ {l:"adv",q:"It is his attitude ___ annoys me.",o:["what","that","which who","whom"],a:1,e:"Cleft emphasis on a thing → 'that'."},
+ {l:"adv",q:"___ finished, she went home.",o:["Having","Had","Have","Being"],a:0,e:"Perfect participle clause: 'Having + p.p.' = after finishing."},
+ {l:"adv",q:"___ in 1900, the building is very old.",o:["Built","Building","Having built","To build"],a:0,e:"Passive participle clause: 'Built…' = Because it was built…"},
+ {l:"adv",q:"The results, ___ were surprising, changed everything.",o:["that","which","what","who"],a:1,e:"Non-defining relative about a thing uses 'which' (never 'that')."},
+ {l:"adv",q:"This is a problem ___ solution is unclear.",o:["who","whose","which","that"],a:1,e:"'whose' can refer to things = 'of which the'."},
+ {l:"adv",q:"He suggested that she ___ early.",o:["leaves","leave","left","leaving"],a:1,e:"Subjunctive after 'suggest that' → base form."},
+ {l:"adv",q:"It's essential that he ___ present.",o:["is","be","being","was"],a:1,e:"Subjunctive after 'it's essential that' → 'be'."},
+ {l:"adv",q:"I'd rather you ___ tell anyone.",o:["don't","didn't","won't","not"],a:1,e:"'would rather + subject + past' for present/future."},
+ {l:"adv",q:"If only I ___ studied harder!",o:["have","had","would","did"],a:1,e:"'If only + past perfect' for a past regret."},
+ {l:"adv",q:"___ the rain, we went out.",o:["Despite","Although","However","Because"],a:0,e:"'Despite + noun'."},
+ {l:"adv",q:"___ it was raining, we went out.",o:["Despite","In spite","Although","Because of"],a:2,e:"'Although + clause (subject + verb)'."},
+ {l:"adv",q:"Such ___ his anger that he left.",o:["was","is","were","be"],a:0,e:"'Such + was + noun … that' — inversion."},
+ {l:"adv",q:"So difficult ___ the test that few passed.",o:["was","it was","were","being"],a:0,e:"'So + adjective + was + subject … that' — inversion."},
+ {l:"adv",q:"Little ___ that he was lying.",o:["I knew","did I know","I did know","knew I"],a:1,e:"Fronted 'Little' triggers inversion."},
+ {l:"adv",q:"Only when she left ___ the truth.",o:["I learned","did I learn","I did learn","learned I"],a:1,e:"'Only when…' fronted → inversion in the main clause."},
+ {l:"adv",q:"…a factor the extent ___ which is unclear.",o:["of","to","in","for"],a:1,e:"Fixed phrase 'the extent to which'."},
+ {l:"adv",q:"He may ___ have forgotten.",o:["good","well","be","very"],a:1,e:"'may well' = it's quite likely (hedging)."},
+ {l:"adv",q:"This tends ___ happen in winter.",o:["to","(nothing)","-ing","that"],a:0,e:"'tend to + infinitive'."},
+ {l:"adv",q:"Not until midnight ___ home.",o:["he came","did he come","came he","he did come"],a:1,e:"'Not until…' fronted → inversion."},
+ {l:"adv",q:"Hardly ___ when the bell rang.",o:["had he arrived","he had arrived","did he arrive","he arrived"],a:0,e:"'Hardly + had + subject … when' — inversion."},
+ {l:"adv",q:"Scarcely had we left ___ it started to rain.",o:["than","when","then","that"],a:1,e:"'Scarcely … when' (pairs with 'when')."},
+ {l:"adv",q:"No sooner had we left ___ it rained.",o:["when","than","then","that"],a:1,e:"'No sooner … than' (pairs with 'than')."},
+ {l:"adv",q:"It is widely ___ that the plan failed.",o:["believe","believed","believing","believes"],a:1,e:"Impersonal passive: 'It is + past participle + that'."},
+ {l:"adv",q:"He is said ___ very rich.",o:["to be","being","be","is"],a:0,e:"'is said to be' — passive report structure."},
+ {l:"adv",q:"___ having little money, she travels a lot.",o:["Despite","Although","However","Because"],a:0,e:"'Despite + -ing' is possible ('Despite having…')."},
+ {l:"adv",q:"The more you practise, ___ you get.",o:["the better","better","the best","more better"],a:0,e:"'the + comparative …, the + comparative' structure."},
+ {l:"adv",q:"Never before ___ such a thing.",o:["I have seen","have I seen","did I saw","I saw"],a:1,e:"Fronted 'Never before' → inversion with 'have'."},
+ {l:"adv",q:"Under no circumstances ___ leave.",o:["you should","should you","you must","must"],a:1,e:"'Under no circumstances' → inversion."},
+ {l:"adv",q:"So loud was the music ___ we couldn't talk.",o:["than","that","which","as"],a:1,e:"'So + adj … that' expresses result."},
+ {l:"adv",q:"It was not until she spoke ___ I recognised her.",o:["than","that","when","then"],a:1,e:"Cleft with 'It was not until … that'."},
+ {l:"adv",q:"Whatever ___, don't give up.",o:["happen","happens","happening","happened"],a:1,e:"'Whatever' takes a singular present verb here."},
+ {l:"adv",q:"He talks as if he ___ everything.",o:["knows","knew","known","knowing"],a:1,e:"'as if + past' for an unreal/hypothetical present."},
+ {l:"adv",q:"The proposal ___ by the board last week.",o:["approved","was approved","has approve","is approving"],a:1,e:"Past passive: was + past participle."},
+ {l:"adv",q:"Only by working hard ___ succeed.",o:["you can","can you","you could","could"],a:1,e:"'Only by + -ing' fronted → inversion."},
+ {l:"adv",q:"So great was the demand ___ they sold out.",o:["that","than","which","as"],a:0,e:"'So + adj + was … that' — result + inversion."},
+ {l:"adv",q:"Were it not for your help, I ___ failed.",o:["will have","would have","had","would"],a:1,e:"'Were it not for…' = if it weren't for → would have + p.p."},
+ {l:"adv",q:"Barely ___ sat down when the phone rang.",o:["I had","had I","did I","I did"],a:1,e:"Fronted 'Barely' → inversion with past perfect."},
+ {l:"adv",q:"It's high time we ___.",o:["leave","left","leaving","to leave"],a:1,e:"'It's high time + past simple'."},
+ {l:"adv",q:"Not a single word ___ she say.",o:["did","does","do","was"],a:0,e:"Fronted negative object → inversion with 'did'."},
+ {l:"adv",q:"Such was his fame ___ everyone knew him.",o:["that","than","which","as"],a:0,e:"'Such was + noun … that' — inversion + result."},
+ {l:"adv",q:"Provided ___ you finish, you can leave.",o:["that","if","unless","because"],a:0,e:"'Provided (that)' = on condition that."},
+ {l:"adv",q:"He objected ___ being interrupted.",o:["at","to","for","against"],a:1,e:"'object to + -ing' (to is a preposition)."},
+];
+
+/* ============================ STATE ============================ */
+const BLANK={v:2,start:null,days:{},weeks:{},drill:{tot:0,ok:0},tests:{},writing:[]};
+let S=JSON.parse(JSON.stringify(BLANK));
+let CFG={owner:"",repo:"",branch:"main",path:"cae-progress.json",token:""};
+let SHA=null, saveTimer=null, connected=false;
+
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function cacheLocal(){lsSet("cae_state",JSON.stringify(S))}
+function loadLocal(){const r=lsGet("cae_state"); if(r){try{S={...BLANK,...JSON.parse(r)}}catch(e){}}}
+
+function b64enc(str){return btoa(unescape(encodeURIComponent(str)))}
+function b64dec(b){return decodeURIComponent(escape(atob(b)))}
+function ghUrl(){return "https://api.github.com/repos/"+CFG.owner+"/"+CFG.repo+"/contents/"+CFG.path}
+function ghHeaders(){return {"Authorization":"Bearer "+CFG.token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}}
+
+async function ghLoad(){
+  const r=await fetch(ghUrl()+"?ref="+encodeURIComponent(CFG.branch),{headers:ghHeaders()});
+  if(r.status===404){SHA=null;return null;}
+  if(!r.ok) throw new Error("GitHub "+r.status+" — "+(r.status===401?"bad token":r.status===403?"forbidden / rate limit":"check owner/repo/path"));
+  const j=await r.json(); SHA=j.sha; return JSON.parse(b64dec(j.content));
+}
+async function ghSave(){
+  if(!connected) return;
+  setSync("saving");
+  const body={message:"progress "+new Date().toISOString().slice(0,16).replace("T"," "),
+    content:b64enc(JSON.stringify(S,null,2)),branch:CFG.branch};
+  if(SHA) body.sha=SHA;
+  let r=await fetch(ghUrl(),{method:"PUT",headers:{...ghHeaders(),"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(r.status===409){try{await ghLoad(); if(SHA) body.sha=SHA; r=await fetch(ghUrl(),{method:"PUT",headers:{...ghHeaders(),"Content-Type":"application/json"},body:JSON.stringify(body)});}catch(e){}}
+  if(!r.ok){setSync("err","save failed "+r.status);return;}
+  const j=await r.json(); SHA=j.content.sha;
+  setSync("ok","synced "+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+}
+function scheduleSave(){cacheLocal(); if(!connected){setSync("local");return;} clearTimeout(saveTimer); setSync("pending"); saveTimer=setTimeout(()=>{ghSave().catch(e=>setSync("err",e.message));},1500);}
+function setSync(kind,msg){const el=document.getElementById("sync"); el.className="sync";
+  if(kind==="ok"){el.classList.add("ok");el.innerHTML="GitHub <b>"+msg+"</b>";}
+  else if(kind==="err"){el.classList.add("err");el.innerHTML="<b>"+(msg||"error")+"</b>";}
+  else if(kind==="saving"||kind==="pending"){el.innerHTML="<b>saving…</b>";}
+  else if(kind==="local"){el.innerHTML="Local only · <b>connect GitHub</b>";}
+  else el.textContent="Not connected · local only";}
+
+/* ============================ DATE LOGIC ============================ */
+const iso=d=>d.toISOString().slice(0,10);
+function today(){return iso(new Date())}
+function ensureStart(){if(!S.start)S.start=today();}
+function dayIndex(){return Math.max(0,Math.floor((new Date(today())-new Date(S.start))/864e5));}
+function curWeek(){return Math.min(10,Math.floor(dayIndex()/7)+1);}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return iso(x);}
+function activeDays(){return Object.keys(S.days).filter(d=>BLOCKS.every(b=>S.days[d]&&S.days[d][b.k]))}
+function streak(){let a=new Set(activeDays()),d=today();if(!a.has(d))d=addDays(d,-1);let s=0;while(a.has(d)){s++;d=addDays(d,-1);}return s;}
+function nextTest(){for(const t of TESTS){if(!S.tests[t.id])return t;}return null;}
+function daysToNextTest(){const t=nextTest();if(!t)return null;const due=addDays(S.start,t.afterWeek*7);return Math.max(0,Math.round((new Date(due)-new Date(today()))/864e5));}
+
+/* ============================ RENDER ============================ */
+const $=id=>document.getElementById(id);
+let TAB="today", drillCur=null, drillLvl="all";
+function buildNav(){const html=NAV.map(n=>'<button data-t="'+n[0]+'" class="'+(n[0]==='today'?'on':'')+'"><span class="ic">'+n[1]+'</span>'+n[2]+'</button>').join("");
+  $("nav").innerHTML=html;$("mtabs").innerHTML=html;
+  document.querySelectorAll("#nav button,#mtabs button").forEach(b=>b.onclick=()=>go(b.dataset.t));}
+function go(t){TAB=t;
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.dataset.v===t));
+  document.querySelectorAll("#nav button,#mtabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  ({today:fillToday,plan:fillPlan,drill:fillDrill,tests:fillTests,writing:fillWriting,prog:fillProg,set:fillSet}[t]||(()=>{}))();
+  foot();}
+function foot(){$("fw").textContent=curWeek();$("fs").textContent=streak();const d=daysToNextTest();$("fnt").textContent=d==null?"—":d+"d";}
+function flash(m){const f=$("flash");f.textContent=m;f.classList.add("show");setTimeout(()=>f.classList.remove("show"),1300);}
+
+function fillToday(){
+  ensureStart();
+  const w=WEEKS[curWeek()-1];
+  $("tdate").textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})+" · Week "+curWeek();
+  $("mph").textContent=PHN[w.ph]; $("mg").textContent=w.g; $("mw").textContent="✎ "+w.wr;
+  $("mref").textContent="Grammar feeds the Language scale; the writing task rotates through the loop.";
+  const idx=dayIndex(),beh=(idx+1)-activeDays().length,p=$("mpace");
+  if(idx===0&&!activeDays().length)p.innerHTML='<div class="pace ok">Day one. Do all 3 blocks to start the chain.</div>';
+  else if(beh>=3)p.innerHTML='<div class="pace bad">⚠ '+beh+' days missed. Catch up today.</div>';
+  else if(beh>=1)p.innerHTML='<div class="pace bad">'+beh+' day(s) behind pace.</div>';
+  else p.innerHTML='<div class="pace ok">On pace. Keep the chain unbroken.</div>';
+
+  const ds=S.days[today()]||{};
+  $("tblocks").innerHTML=BLOCKS.map(b=>{
+    const url=b.link==="BBC"?bbc(w.bbc):b.link;
+    const drillBtn=b.drill?'<button class="lnk m" data-godrill="1">5-min drill →</button>':'';
+    return '<div class="task '+(ds[b.k]?'done':'')+'" data-k="'+b.k+'">'+
+      '<div class="box" data-box="1">✓</div>'+
+      '<div class="body"><div class="tt">'+b.tt+'</div><div class="td">'+b.td+'</div>'+
+      '<div class="acts"><a class="lnk" href="'+url+'" target="_blank" rel="noopener">'+b.ll+'</a>'+drillBtn+'</div></div></div>';
+  }).join("");
+  document.querySelectorAll("#tblocks .task").forEach(r=>{
+    r.querySelector('[data-box]').onclick=()=>toggleBlock(r.dataset.k);
+    const gd=r.querySelector('[data-godrill]'); if(gd)gd.onclick=e=>{e.preventDefault();go("drill");};
+  });
+  countToday();
+}
+function toggleBlock(k){const d=today();S.days[d]=S.days[d]||{};S.days[d][k]=!S.days[d][k];scheduleSave();fillToday();foot();}
+function countToday(){const ds=S.days[today()]||{};const n=BLOCKS.filter(b=>ds[b.k]).length;
+  $("tdone").textContent=n+" / 3";$("tstreak").textContent=streak();const d=daysToNextTest();$("tnt").textContent=d==null?"—":d;}
+
+function fillPlan(){
+  const cw=curWeek();
+  $("planlist").innerHTML=[1,2,3].map(ph=>{
+    const rows=WEEKS.filter(w=>w.ph===ph).map(w=>
+      '<div class="wkrow"><div class="wn">W'+w.w+'</div>'+
+      '<div class="g"><div class="h">GRAMMAR</div><div class="v">'+w.g+'</div></div>'+
+      '<div class="w"><div class="h">WRITING</div><div class="v">'+w.wr+'</div></div>'+
+      '<button class="wkdone '+(S.weeks[w.w]?'on':'')+'" data-w="'+w.w+'">'+(S.weeks[w.w]?'✓ done':'mark')+'</button></div>').join("");
+    return '<div class="phase '+(ph===WEEKS[cw-1].ph?'op':'')+'"><div class="phh"><span class="bd">P'+ph+'</span>'+
+      '<span class="tt">'+PHN[ph].split('·')[1].trim()+'</span><span class="wk">'+PHW[ph]+'</span></div><div class="phb">'+rows+'</div></div>';
+  }).join("");
+  document.querySelectorAll(".phh").forEach(h=>h.onclick=()=>h.parentElement.classList.toggle("op"));
+  document.querySelectorAll(".wkdone").forEach(b=>b.onclick=e=>{e.stopPropagation();const w=+b.dataset.w;S.weeks[w]=!S.weeks[w];scheduleSave();fillPlan();});
+}
+
+function drillPool(){return drillLvl==="all"?BANK:BANK.filter(x=>x.l===drillLvl);}
+function fillDrill(){
+  document.querySelectorAll("#lvlseg button").forEach(b=>{b.classList.toggle("on",b.dataset.l===drillLvl);
+    b.onclick=()=>{drillLvl=b.dataset.l;fillDrill();};});
+  $("dpool").textContent=drillPool().length;
+  nextDrill();updDrillStats();
+}
+function nextDrill(){
+  const pool=drillPool();
+  drillCur=pool[Math.floor(Math.random()*pool.length)];
+  const q=drillCur;
+  $("drillcard").innerHTML='<span class="tagpill '+q.l+'">'+(q.l==="int"?"INTERMEDIATE":"ADVANCED")+'</span>'+
+    '<div style="font-size:16px;font-weight:600;margin-bottom:14px">'+q.q+'</div>'+
+    q.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>').join("")+
+    '<div class="expl" id="expl" style="display:none"></div>'+
+    '<button class="btn sm" id="dnext" style="display:none;margin-top:12px">Next question →</button>';
+  document.querySelectorAll("#drillcard .opt").forEach(b=>b.onclick=()=>gradeDrill(+b.dataset.i));
+}
+function gradeDrill(i){
+  const q=drillCur, ok=(i===q.a);
+  document.querySelectorAll("#drillcard .opt").forEach((b,ix)=>{b.style.pointerEvents="none";
+    if(ix===q.a)b.classList.add("correct"); if(ix===i&&!ok)b.classList.add("wrong");});
+  const ex=$("expl");ex.style.display="block";ex.textContent=(ok?"✅ ":"❌ ")+q.e;
+  $("dnext").style.display="inline-flex";$("dnext").onclick=()=>nextDrill();
+  S.drill.tot++; if(ok)S.drill.ok++; scheduleSave(); updDrillStats();
+}
+function updDrillStats(){const t=S.drill.tot,o=S.drill.ok;$("dtot").textContent=t;$("dacc").textContent=t?Math.round(o/t*100)+"%":"—";}
+
+function fillTests(){
+  const cw=curWeek();
+  $("testlist").innerHTML=TESTS.map(t=>{
+    const rec=S.tests[t.id], unlocked=cw>=t.afterWeek, cls=rec?(rec.pass?"pass":"fail"):"";
+    const stTxt=rec?(rec.pass?"PASSED "+rec.pct+"%":"FAILED "+rec.pct+"%"):(unlocked?"DUE NOW":"after week "+t.afterWeek);
+    const stCls=rec?(rec.pass?"pass":"fail"):"";
+    const links=t.links.map(l=>'<a href="'+l[1]+'" target="_blank" rel="noopener">'+l[0]+' ↗</a>').join(" &nbsp;·&nbsp; ");
+    const rev=(rec&&!rec.pass)?'<p class="note" style="color:var(--red);margin:8px 0 0">Below 60% — redo weeks '+t.reviewWeeks.join(", ")+' (see Plan), then try another test.</p>':'';
+    return '<div class="test '+cls+'"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+      '<span style="font-family:var(--disp);font-weight:700;font-size:16px">'+t.title+'</span>'+
+      '<span class="st '+stCls+'">'+stTxt+'</span></div>'+
+      '<p class="note" style="margin:8px 0">'+t.desc+'</p>'+
+      '<p style="font-size:13.5px;margin:0 0 10px">'+links+'</p>'+
+      '<div class="row" style="align-items:center">'+
+      '<input class="field" style="width:90px" type="number" min="0" placeholder="score" id="sc_'+t.id+'" value="'+(rec?rec.score:'')+'">'+
+      '<span class="note">/</span>'+
+      '<input class="field" style="width:90px" type="number" min="1" placeholder="total" id="to_'+t.id+'" value="'+(rec?rec.total:'')+'">'+
+      '<button class="btn sm" data-log="'+t.id+'" '+(unlocked?'':'disabled style="opacity:.4"')+'>Log result</button></div>'+rev+'</div>';
+  }).join("");
+  document.querySelectorAll("[data-log]").forEach(b=>b.onclick=()=>logTest(b.dataset.log));
+}
+function logTest(id){
+  const sc=+$("sc_"+id).value, to=+$("to_"+id).value;
+  if(!to||sc<0||sc>to){flash("Enter a valid score/total");return;}
+  const pct=Math.round(sc/to*100);
+  S.tests[id]={score:sc,total:to,pct,pass:pct>=PASS,date:today()};
+  scheduleSave(); fillTests(); foot();
+  flash(pct>=PASS?"Passed — nice.":"Logged. Redo the weak weeks.");
+}
+
+function fillWriting(){
+  const h=S.writing;
+  $("whist").innerHTML=h.length?h.slice().reverse().map(x=>{
+    const low=(x.ca<4||x.lang<4);
+    return '<div class="task" style="cursor:default"><div class="body"><div class="tt">'+x.type+' <span class="note">· '+x.date+'</span></div>'+
+      '<div class="td">Content '+x.content+' · CommAch '+x.ca+' · Org '+x.org+' · <b style="color:'+(x.lang>=4?'var(--mint)':'var(--red)')+'">Language '+x.lang+'</b>'+(low?' · below band 4 — study a model & rewrite':'')+'</div></div></div>';
+  }).join(""):'<span class="note">No pieces logged yet.</span>';
+}
+
+function fillProg(){
+  const dw=Object.values(S.weeks).filter(Boolean).length;
+  $("pcourse").textContent=Math.round(dw/10*100)+"%";
+  $("pdays").textContent=activeDays().length;
+  $("pacc").textContent=S.drill.tot?Math.round(S.drill.ok/S.drill.tot*100)+"%":"—";
+  $("ptests").textContent=Object.values(S.tests).filter(t=>t.pass).length;
+  const cw=curWeek();
+  $("pweeks").innerHTML=WEEKS.map(w=>{const done=S.weeks[w.w],now=w.w===cw;
+    return '<div title="Week '+w.w+'" style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;background:'+(done?'var(--mint)':'var(--raised)')+';color:'+(done?'#10241b':(now?'var(--coral)':'var(--mut)'))+';border:1px solid '+(now?'var(--coral)':'var(--line)')+'">'+w.w+'</div>';}).join("");
+  const langs=S.writing.map(x=>x.lang);
+  $("ptrend").innerHTML=langs.length?langs.map((l,i)=>'<span style="display:inline-block;margin-right:6px;font-variant-numeric:tabular-nums">'+(i+1)+':<b style="color:'+(l>=4?'var(--mint)':'var(--red)')+'">'+l+'</b></span>').join(""):'<span class="note">No writing logged yet.</span>';
+}
+
+function fillSet(){$("s_owner").value=CFG.owner;$("s_repo").value=CFG.repo;$("s_branch").value=CFG.branch;$("s_path").value=CFG.path;$("s_token").value=CFG.token;
+  $("s_status").textContent=connected?"Connected to "+CFG.owner+"/"+CFG.repo:"Not connected.";}
+
+/* ============================ WIRING ============================ */
+$("wsave").onclick=()=>{const type=$("wtype").value,rec={date:today(),type};
+  document.querySelectorAll(".wsc").forEach(s=>rec[s.dataset.s]=+s.value);
+  S.writing.push(rec);scheduleSave();fillWriting();
+  flash((rec.ca<4||rec.lang<4)?"Logged — below band 4, plan a rewrite":"Logged");};
+$("s_connect").onclick=async()=>{
+  CFG={owner:$("s_owner").value.trim(),repo:$("s_repo").value.trim(),branch:$("s_branch").value.trim()||"main",path:$("s_path").value.trim()||"cae-progress.json",token:$("s_token").value.trim()};
+  if(!CFG.owner||!CFG.repo||!CFG.token){$("s_status").textContent="Fill owner, repo and token.";return;}
+  lsSet("cae_cfg",JSON.stringify(CFG));$("s_status").textContent="Connecting…";
+  try{const remote=await ghLoad();connected=true;
+    if(remote){S={...BLANK,...remote};$("s_status").textContent="Loaded from GitHub ✓";}
+    else{$("s_status").textContent="Connected ✓ (no file yet — will create on first save)";await ghSave();}
+    ensureStart();cacheLocal();setSync("ok","synced");go(TAB);
+  }catch(e){connected=false;$("s_status").textContent="✗ "+e.message;setSync("err",e.message);}};
+$("s_save").onclick=async()=>{if(!connected){$("s_status").textContent="Connect first.";return;}try{await ghSave();$("s_status").textContent="Saved ✓";flash("Committed to GitHub");}catch(e){$("s_status").textContent="✗ "+e.message;}};
+$("s_forget").onclick=()=>{connected=false;CFG={owner:"",repo:"",branch:"main",path:"cae-progress.json",token:""};try{localStorage.removeItem("cae_cfg")}catch(e){}setSync();fillSet();};
+
+/* ============================ INIT ============================ */
+(async function(){
+  buildNav();
+  const c=lsGet("cae_cfg"); if(c){try{CFG=JSON.parse(c)}catch(e){}}
+  loadLocal(); ensureStart();
+  if(CFG.token&&CFG.owner&&CFG.repo){setSync("saving");
+    try{const remote=await ghLoad();connected=true;if(remote){S={...BLANK,...remote};}ensureStart();cacheLocal();setSync("ok","synced");}
+    catch(e){connected=false;setSync("err",e.message);}
+  } else setSync("local");
+  go("today");
+})();
+</script>
+</body>
+</html>
